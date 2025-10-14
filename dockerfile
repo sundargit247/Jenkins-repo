@@ -1,8 +1,5 @@
-FROM node:18-alpine
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --silent
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
+FROM nginx:1.25-alpine
+WORKDIR /usr/share/nginx/html
+COPY build/ .
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
