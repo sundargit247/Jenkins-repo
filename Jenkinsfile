@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "gokulk306/react-task"
+        CONTAINER_NAME = "react-task-container"
+        PORT = "3000"
     }
 
     stages {
@@ -11,11 +13,13 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Gokulk-306/React-app.git'
             }
         }
+
         stage('Build Docker image') {
             steps {
                 sh 'docker build -t $IMAGE_NAME:latest .'
             }
         }
+
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentails', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -25,6 +29,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push image to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentails', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -34,19 +39,33 @@ pipeline {
                 }
             }
         }
-        stage('Cleaning the images') {
+
+        stage('Deploy container') {
             steps {
-                echo 'Cleaning up unused Docker images and containers...'
+                echo 'Deploying React app container on EC2...'
                 sh '''
-                docker rmi -f $IMAGE_NAME:latest || true
+                docker stop $CONTAINER_NAME || true
                 
-                docker image prune -f
-    
-                docker container prune -f
-                
+                docker rm $CONTAINER_NAME || true
+
+                docker pull $IMAGE_NAME:latest
+
+                docker run -d \
+                    --name $CONTAINER_NAME \
+                    -p 80:$PORT \
+                    $IMAGE_NAME:latest
                 '''
             }
         }
-
+        stage('Cleaning') {
+            steps {
+                echo 'Cleaning up Docker images and containers...'
+                sh '''
+                docker rmi -f $IMAGE_NAME:latest || true
+                docker image prune -f
+                docker container prune -f
+                '''
+            }
+        }
     }
 }
