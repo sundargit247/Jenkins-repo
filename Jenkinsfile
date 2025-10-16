@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/Gokulk-306/React-app.git'
+                git branch: 'main', url: 'https://github.com/sundargit247/Jenkins-repo'
             }
         }
 
