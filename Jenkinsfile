@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        githubPush()   // This makes Jenkins trigger the pipeline automatically on GitHub push
+        githubPush()   // This makes Jenkins trigger the pipelinpe automatically on GitHub push
     }
 
     environment {
